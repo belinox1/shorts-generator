@@ -102,3 +102,7 @@ if __name__ == "__main__":
     theme = "stoicism"
     custom_isntructions = "Make them engaging and educative. Aim for viral potential."
     scripts = generate_scripts(theme, custom_isntructions)
+
+    logger.info("📝 Script outputs:")
+    for i, s in enumerate(scripts):
+        logger.info(f"\n🎬 Script {i}: {s.title}\n{s.text}")

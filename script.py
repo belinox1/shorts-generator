@@ -5,10 +5,7 @@ from pydantic import BaseModel
 
 # === CONFIG ===
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-MODEL = "gpt-4.1"  # Replace with "gpt-4-0613" if needed
-
-# === INITIALIZE CLIENT ===
-client = OpenAI(api_key=OPENAI_API_KEY)
+MODEL = "gpt-4.1" 
 
 # === TOOL DEFINITION ===
 tools = [
@@ -96,6 +93,7 @@ def generate_scripts(theme: str, custom_instructions: str):
 
 # === ENTRY POINT ===
 if __name__ == "__main__":
+    client = OpenAI(api_key=OPENAI_API_KEY) # Initilize client
     theme = "stoicism"
     custom_isntructions = "Make them engaging and educative. Aim for viral potential."
     scripts = generate_scripts(theme, custom_isntructions)

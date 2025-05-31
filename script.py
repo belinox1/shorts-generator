@@ -2,10 +2,15 @@ import os
 import json
 from openai import OpenAI
 from pydantic import BaseModel
+import logging
 
 # === CONFIG ===
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 MODEL = "gpt-4.1" 
+
+# === LOGGER SETUP ===
+logging.basicConfig(level=logging.INFO, format="%(message)s")
+logger = logging.getLogger()
 
 # === TOOL DEFINITION ===
 tools = [
@@ -49,7 +54,7 @@ class Script(BaseModel):
 
 # === MAIN LOGIC ===
 def generate_scripts(theme: str, custom_instructions: str):
-    print("🚀 Generating Scripts...")
+    logger.info("🚀 Generating Scripts...")
 
     # Create the chat completion request
     response = client.chat.completions.create(
@@ -78,8 +83,8 @@ def generate_scripts(theme: str, custom_instructions: str):
         tool_response = response.choices[0].message.tool_calls[0].function
         scripts = json.loads(tool_response.arguments)["scripts"]
     except Exception as e:
-        print("❌ Failed to parse scripts:")
-        print(json.dumps(response.model_dump(), indent=2))
+        logger.error("❌ Failed to parse scripts:")
+        logger.error(json.dumps(response.model_dump(), indent=2))
         raise e
 
     # Save the scripts to a file
@@ -87,7 +92,7 @@ def generate_scripts(theme: str, custom_instructions: str):
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(scripts, f, indent=2, ensure_ascii=False)
 
-    print(f"✅ All scripts saved to '{output_path}'")
+    logger.info(f"✅ All scripts saved to '{output_path}'")
 
     return [Script(**data) for data in scripts]
 
@@ -97,4 +102,3 @@ if __name__ == "__main__":
     theme = "stoicism"
     custom_isntructions = "Make them engaging and educative. Aim for viral potential."
     scripts = generate_scripts(theme, custom_isntructions)
-    print(scripts)

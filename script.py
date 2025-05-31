@@ -88,7 +88,7 @@ def generate_scripts(theme: str, custom_instructions: str):
         raise e
 
     # Save the scripts to a file
-    output_path = "stoic_shorts_bulk.json"
+    output_path = "scripts.json"
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(scripts, f, indent=2, ensure_ascii=False)
 

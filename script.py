@@ -15,7 +15,7 @@ tools = [
     {
         "type": "function",
         "function": {
-            "name": "generate_stoic_scripts",
+            "name": "generate_short_scripts",
             "description": "Generate short video scripts",
             "parameters": {
                 "type": "object",
@@ -39,7 +39,7 @@ tools = [
         }
     }
 ]
-
+# === MODEL DEFINITION ===
 class Script(BaseModel):
     title: str
     hook: str
@@ -48,10 +48,10 @@ class Script(BaseModel):
 
     @property
     def text(self):
-        return self.hook + self.body + self.close
+        return f"{self.hook} {self.body} {self.close}"
 
 # === MAIN LOGIC ===
-def generate_scripts():
+def generate_scripts(theme: str, custom_instructions: str):
     print("🚀 Generating Scripts...")
 
     # Create the chat completion request
@@ -61,16 +61,19 @@ def generate_scripts():
             {
                 "role": "user",
                 "content": (
-                    "Generate ten unique Stoicism-themed YouTube Shorts scripts. "
-                    "Each script should include: title, hook, body, and close. "
-                    "Format them using the generate_stoic_scripts function. "
-                    "Make them engaging and educative. Aim for viral potential. "
-                    "In the close always call to action."
+                    f"Generate ten unique {theme} themed YouTube Shorts scripts."
+                    "Aim for about 20s at moderate reading speed."
+                    "Each script should include: title, hook, body, and close."
+                    "In hook catch the attention."
+                    "In value bring value."
+                    "In close always call to action."
+                    "Format them using the generate_short_scripts function. "
+                    f"{custom_instructions}"
                 )
             }
         ],
         tools=tools,
-        tool_choice={"type": "function", "function": {"name": "generate_stoic_scripts"}}
+        tool_choice={"type": "function", "function": {"name": "generate_short_scripts"}}
     )
 
     # Extract the function call arguments
@@ -89,8 +92,11 @@ def generate_scripts():
 
     print(f"✅ All scripts saved to '{output_path}'")
 
-    return scripts
+    return [Script(**data) for data in scripts]
 
 # === ENTRY POINT ===
 if __name__ == "__main__":
-    scripts = generate_scripts()
+    theme = "stoicism"
+    custom_isntructions = "Make them engaging and educative. Aim for viral potential."
+    scripts = generate_scripts(theme, custom_isntructions)
+    print(scripts)

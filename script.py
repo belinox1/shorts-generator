@@ -3,6 +3,9 @@ import json
 from openai import OpenAI
 from pydantic import BaseModel
 import logging
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # === CONFIG ===
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -65,7 +68,7 @@ def generate_scripts(theme: str, custom_instructions: str):
                 "role": "user",
                 "content": (
                     f"Generate ten unique {theme} themed YouTube Shorts scripts."
-                    "Aim for about 20s at moderate reading speed."
+                    "Aim for about 30s at moderate reading speed."
                     "Each script should include: title, hook, body, and close."
                     "In hook catch the attention."
                     "In body bring value."

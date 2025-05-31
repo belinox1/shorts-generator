@@ -67,7 +67,7 @@ def generate_scripts(theme: str, custom_instructions: str):
                     "Aim for about 20s at moderate reading speed."
                     "Each script should include: title, hook, body, and close."
                     "In hook catch the attention."
-                    "In value bring value."
+                    "In body bring value."
                     "In close always call to action."
                     "Format them using the generate_short_scripts function. "
                     f"{custom_instructions}"
@@ -103,6 +103,6 @@ if __name__ == "__main__":
     custom_isntructions = "Make them engaging and educative. Aim for viral potential."
     scripts = generate_scripts(theme, custom_isntructions)
 
-    logger.info("📝 Script outputs:")
+    logger.info("\n📝 Script outputs:")
     for i, s in enumerate(scripts):
         logger.info(f"\n🎬 Script {i}: {s.title}\n{s.text}")

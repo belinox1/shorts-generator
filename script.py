@@ -1,9 +1,9 @@
 import os
 import json
 from openai import OpenAI
-from pydantic import BaseModel
 import logging
 from dotenv import load_dotenv
+from script_model import Script
 
 load_dotenv()
 
@@ -45,16 +45,6 @@ tools = [
         }
     }
 ]
-# === MODEL DEFINITION ===
-class Script(BaseModel):
-    title: str
-    hook: str
-    body: str
-    close: str
-
-    @property
-    def text(self):
-        return f"{self.hook} {self.body} {self.close}"
 
 # === MAIN LOGIC ===
 def generate_scripts(theme: str, custom_instructions: str):

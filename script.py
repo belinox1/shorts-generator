@@ -7,6 +7,7 @@ import logging
 # === CONFIG ===
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 MODEL = "gpt-4.1" 
+client = OpenAI(api_key=OPENAI_API_KEY) # Initilize client
 
 # === LOGGER SETUP ===
 logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -98,10 +99,9 @@ def generate_scripts(theme: str, custom_instructions: str):
 
 # === ENTRY POINT ===
 if __name__ == "__main__":
-    client = OpenAI(api_key=OPENAI_API_KEY) # Initilize client
     theme = "stoicism"
-    custom_isntructions = "Make them engaging and educative. Aim for viral potential."
-    scripts = generate_scripts(theme, custom_isntructions)
+    custom_instructions = "Make them engaging and educative. Aim for viral potential."
+    scripts = generate_scripts(theme, custom_instructions)
 
     logger.info("\n📝 Script outputs:")
     for i, s in enumerate(scripts):

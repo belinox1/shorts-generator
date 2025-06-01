@@ -16,22 +16,16 @@ logger = logging.getLogger()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 MODEL = "dall-e-3"
 IMAGE_SIZE = "1024x1792"
-OUTPUT_DIR = "generated_images"
-os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 # === PROMPT GENERATOR ===
 def build_prompt(script: Script, custom):
     return (
-        f"You're creating an image for a YouTube Short.\n"
-        f"The theme of the channel is {theme}\n\n"
-        f"Details of the video:\n"
-        f"Title: {script.title}\n"
-        f"Script: {script.text}\n"
-        f"The generated image should be vertical (9:16).\n"
-        f"Don't include any text in the image.\n"
         f"{custom}"
+        f"{script.title}\n"
+        f"{script.hook}\n"
+        f"{script.body}\n"
     )
 
 # === IMAGE GENERATOR ===
@@ -50,10 +44,12 @@ def generate_image(prompt, filename):
     time.sleep(1.2)  # Avoid rate limit
 
 # === MAIN ===
-def generate_all_images(script: Script, theme: str, customizations: list[str]):
+def generate_all_images(script: Script, customizations: list[str]):
+    output_dir = script.title
+    os.makedirs(output_dir, exist_ok=True)
     for i, c in enumerate(customizations):
         prompt = build_prompt(script, c)
-        filename = os.path.join(OUTPUT_DIR, f"{script.title}_{i}.png")
+        filename = os.path.join(output_dir, f"{i}.png")
         generate_image(prompt, filename)
 
 
@@ -61,9 +57,8 @@ if __name__ == "__main__":
     input_path = "stoic_shorts_bulk.json"
     with open(input_path, "r", encoding="utf-8") as f:
         scripts = json.load(f)
-    s = Script(**scripts[3])
-    theme = "stoicism"
+    s = Script(**scripts[7])
     customizations = ["Use cinematic lighting, classic style. The image should be dynamic and eye catching.",
-                      "Use dramatic lighting. Deep, enigmatic imagery to capture the meaning of the message.",
-                      "Rich in details related to the theme. Build a narrative"]
-    generate_all_images(s, theme, customizations)
+                      "Use cinematic lighting, abstract style. The image should be thought provoking.",
+                      "Use cinematic lighting, modern style. The image is inspiring."]
+    generate_all_images(s, customizations)

@@ -3,7 +3,7 @@ import json
 from openai import OpenAI
 import logging
 from dotenv import load_dotenv
-from script_model import Script
+from script_model import Script  
 
 load_dotenv()
 
@@ -55,16 +55,22 @@ def generate_scripts(theme: str, custom_instructions: str):
         model=MODEL,
         messages=[
             {
-                "role": "user",
+                "role": "system",
                 "content": (
-                    f"Generate ten unique {theme} themed YouTube Shorts scripts."
-                    "Aim for about 30s at moderate reading speed."
+                    f"You are a creative assistant helping me create scripts for YouTube Shorts."
+                    "For each script aim for about 30s at moderate reading speed."
                     "Each script should include: title, hook, body, and close."
                     "In hook catch the attention."
                     "In body bring value."
                     "In close always call to action."
                     "Format them using the generate_short_scripts function. "
                     f"{custom_instructions}"
+                )
+            },
+                        {
+                "role": "user",
+                "content": (
+                    f"Generate ten scripts with the theme {theme}"
                 )
             }
         ],
@@ -92,8 +98,8 @@ def generate_scripts(theme: str, custom_instructions: str):
 
 # === ENTRY POINT ===
 if __name__ == "__main__":
-    theme = "stoicism"
-    custom_instructions = "Make them engaging and educative. Aim for viral potential."
+    theme = "philosophy"
+    custom_instructions = "Make them deep and meaningful. Aim for viral potential."
     scripts = generate_scripts(theme, custom_instructions)
 
     logger.info("\n📝 Script outputs:")

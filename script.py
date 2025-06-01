@@ -31,6 +31,7 @@ tools = [
                         "items": {
                             "type": "object",
                             "properties": {
+                                "theme": {"type": "string"},
                                 "title": {"type": "string"},
                                 "hook": {"type": "string"},
                                 "body": {"type": "string"},

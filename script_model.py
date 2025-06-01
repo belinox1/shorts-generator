@@ -2,6 +2,7 @@ from pydantic import BaseModel
 
 # === MODEL DEFINITION ===
 class Script(BaseModel):
+    theme: str
     title: str
     hook: str
     body: str

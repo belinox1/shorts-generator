@@ -115,5 +115,5 @@ if __name__ == "__main__":
     input_path = "scripts.json"
     with open(input_path, "r", encoding="utf-8") as f:
         scripts = json.load(f)
-    s = Script(**scripts[1])
-    generate_all_images(s )
+    s = Script(**scripts[0])
+    generate_all_images(s)

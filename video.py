@@ -37,11 +37,11 @@ if __name__ == "__main__":
         scripts = json.load(f)
     for script in scripts:
         s = Script(**script)
+        if not os.path.isfile(s.title+"/video.mp4"):
+            audio_clip = load_audio_clip(s)
 
-        audio_clip = load_audio_clip(s)
+            video_clip = generate_video_clip(s, audio_clip)
 
-        video_clip = generate_video_clip(s, audio_clip)
-
-        # === EXPORT FINAL VIDEO ===
-        output_file = f"{s.title}/video.mp4"
-        video_clip.write_videofile(output_file, codec='libx264', audio_codec='aac', fps=24)
+            # === EXPORT FINAL VIDEO ===
+            output_file = f"./{s.title}/video.mp4"
+            video_clip.write_videofile(output_file, codec='libx264', audio_codec='aac', fps=24)

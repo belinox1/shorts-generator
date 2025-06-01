@@ -2,29 +2,46 @@ from script_model import Script
 from text_to_speech import generate_audio
 import json, os
 from moviepy.audio.io.AudioFileClip import AudioFileClip
-from moviepy.audio.io.ffplay_audiopreviewer import ffplay_audiopreview
-from moviepy.video.io.ImageSequenceClip import ImageSequenceClip
+from moviepy import ImageClip, concatenate_videoclips
 
-if __name__ == "__main__":
-    input_path = "scripts.json"
-    with open(input_path, "r", encoding="utf-8") as f:
-        scripts = json.load(f)
-    s = Script(**scripts[0])
-    audio_path=f"{s.title}/audio.mp3"
-    audio_clip = AudioFileClip(audio_path)
-    #ffplay_audiopreview(audio)
+def load_audio_clip(s: Script):
+    audio_path=f"./{s.title}/audio.mp3"
+    try:
+        audio_clip = AudioFileClip(audio_path)
+    except Exception as e:
+        print(f"An error occurred while loading the audio: {e}")
+        raise e
+    return audio_clip
 
+def generate_video_clip(s: Script, audio_clip: AudioFileClip):
     image_files = sorted([f"{s.title}/{f}" for f in os.listdir(s.title) if f.endswith(".png")])
     num_images = len(image_files)
     segment_duration = audio_clip.duration / num_images
 
     clips = []
-    start_time = 0
-    
-    fps = num_images / audio_clip.duration
-    video_clip = ImageSequenceClip(image_files, fps)
-    final_clip = video_clip.with_audio(audio_clip)
+    for img_path in image_files:
+        clip = (
+            ImageClip(img_path)
+            .resized(lambda t: 1 + 0.02 * t)  # Apply zoom-in effect
+            .with_duration(segment_duration)
+            .with_position("center")
+        )
+        clips.append(clip)
 
-    # === EXPORT FINAL VIDEO ===
-    output_file = f"{s.title}/video.mp4"
-    final_clip.write_videofile(output_file, codec='libx264', audio_codec='aac')
+    return concatenate_videoclips(clips, method="compose").with_audio(audio_clip)
+    
+
+if __name__ == "__main__":
+    input_path = "scripts.json"
+    with open(input_path, "r", encoding="utf-8") as f:
+        scripts = json.load(f)
+    for script in scripts:
+        s = Script(**script)
+
+        audio_clip = load_audio_clip(s)
+
+        video_clip = generate_video_clip(s, audio_clip)
+
+        # === EXPORT FINAL VIDEO ===
+        output_file = f"{s.title}/video.mp4"
+        video_clip.write_videofile(output_file, codec='libx264', audio_codec='aac', fps=24)

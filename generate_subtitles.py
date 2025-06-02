@@ -2,6 +2,11 @@ import os
 import json
 from script_model import Script
 from elevenlabs import CharacterAlignmentResponseModel
+import logging
+
+# === LOGGER SETUP ===
+logging.basicConfig(level=logging.INFO, format="%(message)s")
+logger = logging.getLogger()
 
 
 def format_time(seconds: float) -> str:
@@ -11,7 +16,8 @@ def format_time(seconds: float) -> str:
     ms = int((seconds - int(seconds)) * 1000)
     return f"{h:02}:{m:02}:{s:02},{ms:03}"
 
-def generate_subtitles_from_alignment(alignment, filename: str, max_chars=25):
+def generate_subtitles_from_alignment(alignment, filename: str, max_chars=10):
+    logger.info(f"Generation subtitles for {filename}")
     characters = alignment.characters
     starts = alignment.character_start_times_seconds
     ends = alignment.character_end_times_seconds
@@ -63,15 +69,16 @@ if __name__ == "__main__":
     input_path = "scripts.json"
     with open(input_path, "r", encoding="utf-8") as f:
         scripts = json.load(f)
-    s = Script(**scripts[0])
+    for script in scripts:    
+        s = Script(**script)
 
-    output_dir = s.title
-    os.makedirs(output_dir, exist_ok=True)
+        output_dir = s.title
+        os.makedirs(output_dir, exist_ok=True)
 
-    alignment_filename = os.path.join(output_dir, "alignment.json")
-    with open(alignment_filename, "r", encoding="utf-8") as f:
-        data = json.load(f)
-        alignment = CharacterAlignmentResponseModel(**data)
+        alignment_filename = os.path.join(output_dir, "alignment.json")
+        with open(alignment_filename, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            alignment = CharacterAlignmentResponseModel(**data)
 
-    subtitle_filename = os.path.join(output_dir, f"subtitles.srt")
-    generate_subtitles_from_alignment(alignment, subtitle_filename)
+        subtitle_filename = os.path.join(output_dir, f"subtitles.srt")
+        generate_subtitles_from_alignment(alignment, subtitle_filename)

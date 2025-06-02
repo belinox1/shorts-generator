@@ -4,6 +4,11 @@ from moviepy.audio.io.AudioFileClip import AudioFileClip
 from moviepy import ImageClip, concatenate_videoclips
 from moviepy import TextClip, CompositeVideoClip
 from moviepy.video.tools.subtitles import SubtitlesClip
+import logging
+
+# === LOGGER SETUP ===
+logging.basicConfig(level=logging.INFO, format="%(message)s")
+logger = logging.getLogger()
 
 def load_audio_clip(s: Script):
     audio_path=f"./{s.title}/audio.mp3"
@@ -15,6 +20,7 @@ def load_audio_clip(s: Script):
     return audio_clip
 
 def generate_video_clip(s: Script, audio_clip: AudioFileClip):
+    logging.info(f"🎬 Generating video for {s.title}...")
     image_files = sorted([f"{s.title}/{f}" for f in os.listdir(s.title) if f.endswith(".png")])
     num_images = len(image_files)
     segment_duration = audio_clip.duration / num_images
@@ -23,7 +29,7 @@ def generate_video_clip(s: Script, audio_clip: AudioFileClip):
     for img_path in image_files:
         clip = (
             ImageClip(img_path)
-            .resized(lambda t: 1 + 0.02 * t)  # Apply zoom-in effect
+            .resized(lambda t: 1 + 0.05 * t)  # Apply zoom-in effect
             .with_duration(segment_duration)
             .with_position("center")
         )
@@ -35,7 +41,7 @@ def subtitle_generator(txt):
     return TextClip(
         font="DejaVuSans",
         text=txt,
-        font_size=60,        
+        font_size=100,        
         color="white",
         stroke_color="black",
         stroke_width=5,
@@ -52,8 +58,9 @@ if __name__ == "__main__":
     input_path = "scripts.json"
     with open(input_path, "r", encoding="utf-8") as f:
         scripts = json.load(f)
-    for script in scripts[:1]:
+    for script in scripts:
         s = Script(**script)
+        logger.info(f"{s.title}")
         audio_clip = load_audio_clip(s)
 
         video_clip = generate_video_clip(s, audio_clip)

@@ -25,7 +25,7 @@ def save_alignment(alignment, path: str):
         json.dump(alignment.dict(), f, indent=2, ensure_ascii=False)
 
 def generate_audio(text: str, output_dir: str):
-    logger.info(f"🗣️ Generating audio for {output_dir}...")
+    logger.info(f"🔊 Generating audio for {output_dir}...")
     audio = elevenlabs.text_to_speech.convert_with_timestamps(
         text=text,
         voice_id="nPczCjzI2devNBz1zQrb",

@@ -45,7 +45,7 @@ def generate_audio(text: str, output_dir: str):
 
 # === ENTRY POINT ===
 if __name__ == "__main__":
-    input_path = "scripts.json"
+    input_path = "stoicism.json"
     with open(input_path, "r", encoding="utf-8") as f:
         scripts = json.load(f)
     for script in scripts:

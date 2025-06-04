@@ -2,7 +2,7 @@ from script_model import Script
 import json, os
 from moviepy.audio.io.AudioFileClip import AudioFileClip
 from moviepy import ImageClip, concatenate_videoclips
-from moviepy import TextClip, CompositeVideoClip
+from moviepy import TextClip, CompositeVideoClip, CompositeAudioClip
 from moviepy.video.tools.subtitles import SubtitlesClip
 import logging
 
@@ -25,6 +25,14 @@ def generate_video_clip(s: Script, audio_clip: AudioFileClip):
     num_images = len(image_files)
     segment_duration = audio_clip.duration / num_images
 
+    music = AudioFileClip("background_music.mp3").subclipped(21.5)  # skip first seconds
+    music = music.with_volume_scaled(0.4)
+    music = music.with_duration(audio_clip.duration+1) 
+
+    final_audio = CompositeAudioClip([audio_clip, music])
+
+    segment_duration = final_audio.duration / num_images
+
     clips = []
     for img_path in image_files:
         clip = (
@@ -35,7 +43,18 @@ def generate_video_clip(s: Script, audio_clip: AudioFileClip):
         )
         clips.append(clip)
 
-    return concatenate_videoclips(clips, method="compose").with_audio(audio_clip)
+    video_clip = concatenate_videoclips(clips, method="compose").with_audio(final_audio)
+
+    subtitles_clip = SubtitlesClip(f"{s.title}/subtitles.srt", make_textclip=subtitle_generator)
+
+    subtitles_clip = subtitles_clip.with_position(("center", "center")) 
+
+    # Combine with video
+    final_video = CompositeVideoClip([video_clip, subtitles_clip])
+
+    output_file = f"./{s.title}/video.mp4"
+    final_video.write_videofile(output_file, codec='libx264', audio_codec='aac', fps=24)
+    
 
 def subtitle_generator(txt):
     return TextClip(
@@ -55,7 +74,7 @@ def subtitle_generator(txt):
     
 
 if __name__ == "__main__":
-    input_path = "scripts.json"
+    input_path = "stoicism.json" 
     with open(input_path, "r", encoding="utf-8") as f:
         scripts = json.load(f)
     for script in scripts:
@@ -64,16 +83,3 @@ if __name__ == "__main__":
         audio_clip = load_audio_clip(s)
 
         video_clip = generate_video_clip(s, audio_clip)
-
-        subtitles_clip = SubtitlesClip(f"{s.title}/subtitles.srt", make_textclip=subtitle_generator)
-
-        # Set position at runtime using a lambda (this works!)
-        subtitles_clip = subtitles_clip.with_position(("center", "center")) 
-
-        # Combine with video
-        final_video = CompositeVideoClip([video_clip, subtitles_clip])
-
-
-        # === EXPORT FINAL VIDEO ===
-        output_file = f"./{s.title}/video.mp4"
-        final_video.write_videofile(output_file, codec='libx264', audio_codec='aac', fps=24)

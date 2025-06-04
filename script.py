@@ -37,7 +37,7 @@ tools = [
                                 "body": {"type": "string"},
                                 "close": {"type": "string"}
                             },
-                            "required": ["title", "hook", "body", "close"]
+                            "required": ["theme", "title", "hook", "body", "close"]
                         }
                     }
                 },
@@ -99,8 +99,8 @@ def generate_scripts(theme: str, custom_instructions: str):
 
 # === ENTRY POINT ===
 if __name__ == "__main__":
-    theme = "philosophy"
-    custom_instructions = "Make them deep and meaningful. Aim for viral potential."
+    theme = "stoicism"
+    custom_instructions = "Focus on facts about nature and science. The script will be used for subtitles so avoid dashes."
     scripts = generate_scripts(theme, custom_instructions)
 
     logger.info("\n📝 Script outputs:")

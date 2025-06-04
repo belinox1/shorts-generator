@@ -55,11 +55,12 @@ def build_prompts(script: Script):
                 "content": (
                     "You are a creative assistant helping generate DALL·E image prompts for YouTube Shorts. "
                     "Your goal is to create prompts based on a script:\n"
-                    "Each prompt should describe a vertical, cinematic, visually compelling image, without any text or logos."
+                    "Each prompt should describe a vertical, portrait, cinematic, visually compelling image, without any text or logos."
                     "The prompts must not refer directly to the script lines but instead visually represent the idea or emotion behind them."
                     "Each image will be prompted individually, so the prompts should not refer each other."
                     "Anyways, try to keep the images coherent to form a video." 
                     "Explore styles." 
+                    "Be very descriptive to capture the mood and the theme right."
                 )
             },
                         {
@@ -112,8 +113,8 @@ def generate_all_images(script: Script):
 
 
 if __name__ == "__main__":
-    input_path = "scripts.json"
+    input_path = "stoicism.json"
     with open(input_path, "r", encoding="utf-8") as f:
         scripts = json.load(f)
-    s = Script(**scripts[0])
+    s = Script(**scripts[7])
     generate_all_images(s)

@@ -16,7 +16,7 @@ def format_time(seconds: float) -> str:
     ms = int((seconds - int(seconds)) * 1000)
     return f"{h:02}:{m:02}:{s:02},{ms:03}"
 
-def generate_subtitles_from_alignment(alignment, filename: str, max_chars=10):
+def generate_subtitles_from_alignment(alignment, filename: str, max_chars=5):
     logger.info(f"Generation subtitles for {filename}")
     characters = alignment.characters
     starts = alignment.character_start_times_seconds
@@ -61,12 +61,12 @@ def generate_subtitles_from_alignment(alignment, filename: str, max_chars=10):
     flush()  # Final flush if anything remains
 
     with open(filename, "w", encoding="utf-8") as f:
-        f.write("\n".join(subtitles) + "\n")
+        f.write("\n".join(subtitles).replace("-", " ").replace("—", " — " ) + "\n")
 
 
 
 if __name__ == "__main__":
-    input_path = "scripts.json"
+    input_path = "stoicism.json"
     with open(input_path, "r", encoding="utf-8") as f:
         scripts = json.load(f)
     for script in scripts:    

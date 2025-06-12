@@ -23,22 +23,24 @@ def generate_video_clip(s: Script, audio_clip: AudioFileClip):
     logging.info(f"🎬 Generating video for {s.title}...")
     image_files = sorted([f"{s.title}/{f}" for f in os.listdir(s.title) if f.endswith(".png")])
     num_images = len(image_files)
-    segment_duration = audio_clip.duration / num_images
-
-    music = AudioFileClip("background_music.mp3").subclipped(21.5)  # skip first seconds
-    music = music.with_volume_scaled(0.4)
+    bg_music = "background_music.mp3"
+    music = AudioFileClip(bg_music).subclipped(21.5)  # skip first seconds
+    music = music.with_volume_scaled(0.40)
     music = music.with_duration(audio_clip.duration+1) 
 
     final_audio = CompositeAudioClip([audio_clip, music])
 
-    segment_duration = final_audio.duration / num_images
+    f1 = 3.576
+    f2 = 7.232
+    f3 = 11.192
+    segment_duration = [f1, f2-f1 , f3-f2, final_audio.duration-f3]
 
     clips = []
-    for img_path in image_files:
+    for img_path, duration in zip(image_files, segment_duration):
         clip = (
             ImageClip(img_path)
             .resized(lambda t: 1 + 0.05 * t)  # Apply zoom-in effect
-            .with_duration(segment_duration)
+            .with_duration(duration)
             .with_position("center")
         )
         clips.append(clip)
@@ -52,7 +54,7 @@ def generate_video_clip(s: Script, audio_clip: AudioFileClip):
     # Combine with video
     final_video = CompositeVideoClip([video_clip, subtitles_clip])
 
-    output_file = f"./{s.title}/video.mp4"
+    output_file = f"./{s.title}/{s.title}.mp4"
     final_video.write_videofile(output_file, codec='libx264', audio_codec='aac', fps=24)
     
 
@@ -77,7 +79,7 @@ if __name__ == "__main__":
     input_path = "stoicism.json" 
     with open(input_path, "r", encoding="utf-8") as f:
         scripts = json.load(f)
-    for script in scripts:
+    for script in scripts[6:7]:
         s = Script(**script)
         logger.info(f"{s.title}")
         audio_clip = load_audio_clip(s)

@@ -10,8 +10,10 @@ import logging
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger()
 
-def load_audio_clip(s: Script):
-    audio_path=f"./{s.title}/audio.mp3"
+STANDARD_RESOLUTION = (1080, 1920)
+
+def load_audio_clip(title: str):
+    audio_path=f"./{title}/audio.mp3"
     try:
         audio_clip = AudioFileClip(audio_path)
     except Exception as e:
@@ -19,10 +21,12 @@ def load_audio_clip(s: Script):
         raise e
     return audio_clip
 
-def generate_video_clip(s: Script, audio_clip: AudioFileClip):
-    logging.info(f"🎬 Generating video for {s.title}...")
-    image_files = sorted([f"{s.title}/{f}" for f in os.listdir(s.title) if f.endswith(".png")])
+def generate_video_clip(title: str):
+    logging.info(f"🎬 Generating video for {title}...")
+    image_files = sorted([f"{title}/{f}" for f in os.listdir(title) if f.endswith(".png")])
     num_images = len(image_files)
+
+    audio_clip = load_audio_clip(title)
     bg_music = "background_music.mp3"
     music = AudioFileClip(bg_music).subclipped(21.5)  # skip first seconds
     music = music.with_volume_scaled(0.40)
@@ -30,15 +34,14 @@ def generate_video_clip(s: Script, audio_clip: AudioFileClip):
 
     final_audio = CompositeAudioClip([audio_clip, music])
 
-    f1 = 3.576
-    f2 = 7.232
-    f3 = 11.192
-    segment_duration = [f1, f2-f1 , f3-f2, final_audio.duration-f3]
+    image_start = [0.0, 2.774, 7.535, 12.492, final_audio.duration]
+    segment_duration = [image_start[i+1] - image_start[i] for i in range(len(image_start)-1)]
 
     clips = []
     for img_path, duration in zip(image_files, segment_duration):
         clip = (
             ImageClip(img_path)
+            .resized(height=STANDARD_RESOLUTION[1])
             .resized(lambda t: 1 + 0.05 * t)  # Apply zoom-in effect
             .with_duration(duration)
             .with_position("center")
@@ -47,15 +50,21 @@ def generate_video_clip(s: Script, audio_clip: AudioFileClip):
 
     video_clip = concatenate_videoclips(clips, method="compose").with_audio(final_audio)
 
-    subtitles_clip = SubtitlesClip(f"{s.title}/subtitles.srt", make_textclip=subtitle_generator)
+    subtitles_clip = SubtitlesClip(f"{title}/subtitles.srt", make_textclip=subtitle_generator)
 
     subtitles_clip = subtitles_clip.with_position(("center", "center")) 
-
+    
     # Combine with video
     final_video = CompositeVideoClip([video_clip, subtitles_clip])
 
-    output_file = f"./{s.title}/{s.title}.mp4"
-    final_video.write_videofile(output_file, codec='libx264', audio_codec='aac', fps=24)
+    output_file = f"./{title}/{title}.mp4"
+    
+    final_video.write_videofile(output_file,
+                               codec='libx264',
+                               audio_codec='aac', 
+                               fps=30, bitrate="8M", 
+                               preset="slow", 
+                               threads=4)
     
 
 def subtitle_generator(txt):
@@ -76,12 +85,5 @@ def subtitle_generator(txt):
     
 
 if __name__ == "__main__":
-    input_path = "stoicism.json" 
-    with open(input_path, "r", encoding="utf-8") as f:
-        scripts = json.load(f)
-    for script in scripts[6:7]:
-        s = Script(**script)
-        logger.info(f"{s.title}")
-        audio_clip = load_audio_clip(s)
-
-        video_clip = generate_video_clip(s, audio_clip)
+    title = "Stoic Morning Routine"
+    video_clip = generate_video_clip(title)
